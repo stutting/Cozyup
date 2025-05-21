@@ -1,0 +1,7 @@
+Flask
+APScheduler
+python-dateutil
+icalendar
+Jinja2
+python-dotenv
+py-cozi
