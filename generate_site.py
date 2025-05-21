@@ -1,10 +1,9 @@
 import os
 import requests
-from datetime import datetime, timedelta, time
-from icalendar import Calendar
-from dateutil import tz
 
-DAYS_AHEAD = int(os.getenv('DAYS_AHEAD', '7'))
+from datetime import datetime, timedelta
+from icalendar import Calendar
+main
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -57,25 +56,21 @@ def fetch_calendar(url):
     return Calendar.from_ical(resp.text)
 
 def parse_events(cal):
-    now = datetime.now(tz=tz.tzlocal())
-    horizon = now + timedelta(days=DAYS_AHEAD)
+
+    now = datetime.now()
+    horizon = now + timedelta(days=7)
     events = []
-    seen = set()
     for comp in cal.walk('vevent'):
         start = comp.decoded('dtstart')
         if isinstance(start, datetime):
-            start = start.astimezone(tz.tzlocal())
+            pass
         else:
-            start = datetime.combine(start, time.min).replace(tzinfo=tz.tzlocal())
+            start = datetime.combine(start, datetime.min.time())
         if now.date() <= start.date() <= horizon.date():
             summary = str(comp.get('summary'))
-            key = (start.isoformat(), summary)
-            if key in seen:
-                continue
-            seen.add(key)
-            all_day = comp.get('dtstart').params.get('VALUE') == 'DATE'
-            events.append((start, summary, all_day))
-    return sorted(events, key=lambda e: e[0])
+            events.append((start, summary))
+    return events
+ main
 
 def main():
     cozi = os.getenv('COZI_ICS_URL')
@@ -93,14 +88,15 @@ def main():
     events.sort(key=lambda x: x[0])
     content_parts = []
     current_day = None
-    for start, summary, all_day in events:
+
+    for start, summary in events:
         day_label = start.strftime('%A %b %d')
-        time_label = '' if all_day else start.strftime('%I:%M %p').lstrip('0')
+        time_label = start.strftime('%I:%M %p').lstrip('0')
         if day_label != current_day:
             content_parts.append(f"<div class='event-day'>{day_label}</div>")
             current_day = day_label
-        label = f"- {time_label} {summary}" if time_label else f"- {summary}"
-        content_parts.append(f"<div class='event'>{label}</div>")
+        content_parts.append(f"<div class='event'>- {time_label} {summary}</div>")
+main
     html = TEMPLATE.format(content='\n'.join(content_parts), hash=pw_hash)
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
