@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Family Calendar</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 2em; }
+.hidden { display: none; }
+.event-day { margin-top: 1em; font-weight: bold; }
+</style>
+<script>
+const HASH = '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b';
+function sha256(str) {
+  const buf = new TextEncoder('utf-8').encode(str);
+  return crypto.subtle.digest('SHA-256', buf).then(buf => {
+    return Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2, '0')).join('');
+  });
+}
+async function checkPassword() {
+  const pwd = document.getElementById('pwd').value;
+  const digest = await sha256(pwd);
+  if (digest === HASH) {
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('content').classList.remove('hidden');
+  } else {
+    alert('Incorrect password');
+  }
+}
+</script>
+</head>
+<body>
+<div id="login">
+  <p>Please enter password:</p>
+  <input type="password" id="pwd" />
+  <button onclick="checkPassword()">Enter</button>
+</div>
+<div id="content" class="hidden">
+  <h1>Family Calendar</h1>
+  <div class='event-day'>Monday May 19</div>
+  <div class='event'>- 9:00 AM Breakfast with family</div>
+  <div class='event'>- 1:00 PM Doctor Appointment</div>
+  <div class='event-day'>Tuesday May 20</div>
+  <div class='event'>- 3:00 PM Soccer Practice</div>
+</div>
+</body>
+</html>
