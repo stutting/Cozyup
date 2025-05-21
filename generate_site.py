@@ -1,7 +1,9 @@
 import os
-import requests
+
 from datetime import datetime, timedelta
 from icalendar import Calendar
+import requests
+main
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -53,14 +55,16 @@ def fetch_calendar(url):
     resp.raise_for_status()
     return Calendar.from_ical(resp.text)
 
-def parse_events(cal, days_ahead: int):
-    """Extract upcoming events within the horizon."""
+
+def parse_events(cal, horizon_days):
     now = datetime.now()
-    horizon = now + timedelta(days=days_ahead)
+    horizon = now + timedelta(days=horizon_days)
     events = []
     for comp in cal.walk('vevent'):
         start = comp.decoded('dtstart')
-        if not isinstance(start, datetime):
+        if isinstance(start, datetime):
+            pass
+        else:
             start = datetime.combine(start, datetime.min.time())
         if now.date() <= start.date() <= horizon.date():
             summary = str(comp.get('summary'))
@@ -72,6 +76,8 @@ def main():
     outlook = os.getenv('OUTLOOK_ICS_URL')
     pw_hash = os.getenv('SITE_PASSWORD_HASH', '')
     days_ahead = int(os.getenv('DAYS_AHEAD', '7'))
+    output_dir = os.getenv('OUTPUT_DIR', 'docs')
+
 
     if not (cozi and outlook):
         raise SystemExit('Missing ICS URLs')
@@ -84,19 +90,18 @@ def main():
         except Exception as e:
             print('Failed to load', url, e)
 
-    # Deduplicate events by (start time, summary)
-    deduped = {}
-    for start, summary in events:
-        key = (start.replace(tzinfo=None), summary)
-        if key not in deduped:
-            deduped[key] = (start, summary)
+    # deduplicate events
+    deduped = []
+    seen = set()
+    for ev in events:
+        if ev not in seen:
+            deduped.append(ev)
+            seen.add(ev)
 
-    events = sorted(deduped.values(), key=lambda x: x[0])
-
-    # Generate HTML content
+    deduped.sort(key=lambda x: x[0])
     content_parts = []
     current_day = None
-    for start, summary in events:
+    for start, summary in deduped:
         day_label = start.strftime('%A %b %d')
         time_label = start.strftime('%I:%M %p').lstrip('0')
         if day_label != current_day:
@@ -105,9 +110,12 @@ def main():
         content_parts.append(f"<div class='event'>- {time_label} {summary}</div>")
 
     html = TEMPLATE.format(content='\n'.join(content_parts), hash=pw_hash)
-    with open('index.html', 'w', encoding='utf-8') as f:
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, 'index.html')
+    with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
-    print('index.html generated')
+    print(out_path, 'generated')
+
 
 if __name__ == '__main__':
     main()
