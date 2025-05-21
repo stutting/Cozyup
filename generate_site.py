@@ -1,8 +1,10 @@
 import os
+
 from datetime import datetime, timedelta
 
 import requests
 from icalendar import Calendar
+
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -54,7 +56,9 @@ def fetch_calendar(url):
     resp.raise_for_status()
     return Calendar.from_ical(resp.text)
 
+
 def parse_events(cal, horizon_days: int):
+
     now = datetime.now()
     horizon = now + timedelta(days=horizon_days)
     events = []
@@ -73,10 +77,12 @@ def main():
     cozi = os.getenv('COZI_ICS_URL')
     outlook = os.getenv('OUTLOOK_ICS_URL')
     pw_hash = os.getenv('SITE_PASSWORD_HASH', '')
+
     if not (cozi and outlook):
         raise SystemExit('Missing ICS URLs')
     days_ahead = int(os.getenv('DAYS_AHEAD', '7'))
     output_dir = os.getenv('OUTPUT_DIR', 'docs')
+
 
     events = []
     for url in (cozi, outlook):
@@ -85,6 +91,7 @@ def main():
             events.extend(parse_events(cal, days_ahead))
         except Exception as e:
             print('Failed to load', url, e)
+
     # deduplicate events by start time and summary
     dedup = {}
     for start, summary in events:
@@ -95,18 +102,23 @@ def main():
     content_parts = []
     current_day = None
     for start, summary in events:
+
         day_label = start.strftime('%A %b %d')
         time_label = start.strftime('%I:%M %p').lstrip('0')
         if day_label != current_day:
             content_parts.append(f"<div class='event-day'>{day_label}</div>")
             current_day = day_label
         content_parts.append(f"<div class='event'>- {time_label} {summary}</div>")
+
+
     html = TEMPLATE.format(content='\n'.join(content_parts), hash=pw_hash)
     os.makedirs(output_dir, exist_ok=True)
     out_path = os.path.join(output_dir, 'index.html')
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
+
     print(f'{out_path} generated')
+
 
 if __name__ == '__main__':
     main()
