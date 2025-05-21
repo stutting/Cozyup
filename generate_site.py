@@ -53,15 +53,14 @@ def fetch_calendar(url):
     resp.raise_for_status()
     return Calendar.from_ical(resp.text)
 
-def parse_events(cal):
+def parse_events(cal, days_ahead: int):
+    """Extract upcoming events within the horizon."""
     now = datetime.now()
-    horizon = now + timedelta(days=7)
+    horizon = now + timedelta(days=days_ahead)
     events = []
     for comp in cal.walk('vevent'):
         start = comp.decoded('dtstart')
-        if isinstance(start, datetime):
-            pass
-        else:
+        if not isinstance(start, datetime):
             start = datetime.combine(start, datetime.min.time())
         if now.date() <= start.date() <= horizon.date():
             summary = str(comp.get('summary'))
@@ -72,16 +71,29 @@ def main():
     cozi = os.getenv('COZI_ICS_URL')
     outlook = os.getenv('OUTLOOK_ICS_URL')
     pw_hash = os.getenv('SITE_PASSWORD_HASH', '')
+    days_ahead = int(os.getenv('DAYS_AHEAD', '7'))
+
     if not (cozi and outlook):
         raise SystemExit('Missing ICS URLs')
+
     events = []
     for url in (cozi, outlook):
         try:
             cal = fetch_calendar(url)
-            events.extend(parse_events(cal))
+            events.extend(parse_events(cal, days_ahead))
         except Exception as e:
             print('Failed to load', url, e)
-    events.sort(key=lambda x: x[0])
+
+    # Deduplicate events by (start time, summary)
+    deduped = {}
+    for start, summary in events:
+        key = (start.replace(tzinfo=None), summary)
+        if key not in deduped:
+            deduped[key] = (start, summary)
+
+    events = sorted(deduped.values(), key=lambda x: x[0])
+
+    # Generate HTML content
     content_parts = []
     current_day = None
     for start, summary in events:
@@ -91,6 +103,7 @@ def main():
             content_parts.append(f"<div class='event-day'>{day_label}</div>")
             current_day = day_label
         content_parts.append(f"<div class='event'>- {time_label} {summary}</div>")
+
     html = TEMPLATE.format(content='\n'.join(content_parts), hash=pw_hash)
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
