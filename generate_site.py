@@ -1,9 +1,10 @@
 import os
 
 from datetime import datetime, timedelta
-from icalendar import Calendar
+
 import requests
-main
+from icalendar import Calendar
+
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -56,7 +57,8 @@ def fetch_calendar(url):
     return Calendar.from_ical(resp.text)
 
 
-def parse_events(cal, horizon_days):
+def parse_events(cal, horizon_days: int):
+
     now = datetime.now()
     horizon = now + timedelta(days=horizon_days)
     events = []
@@ -75,12 +77,12 @@ def main():
     cozi = os.getenv('COZI_ICS_URL')
     outlook = os.getenv('OUTLOOK_ICS_URL')
     pw_hash = os.getenv('SITE_PASSWORD_HASH', '')
-    days_ahead = int(os.getenv('DAYS_AHEAD', '7'))
-    output_dir = os.getenv('OUTPUT_DIR', 'docs')
-
 
     if not (cozi and outlook):
         raise SystemExit('Missing ICS URLs')
+    days_ahead = int(os.getenv('DAYS_AHEAD', '7'))
+    output_dir = os.getenv('OUTPUT_DIR', 'docs')
+
 
     events = []
     for url in (cozi, outlook):
@@ -90,18 +92,17 @@ def main():
         except Exception as e:
             print('Failed to load', url, e)
 
-    # deduplicate events
-    deduped = []
-    seen = set()
-    for ev in events:
-        if ev not in seen:
-            deduped.append(ev)
-            seen.add(ev)
-
-    deduped.sort(key=lambda x: x[0])
+    # deduplicate events by start time and summary
+    dedup = {}
+    for start, summary in events:
+        key = (start.isoformat(), summary)
+        if key not in dedup:
+            dedup[key] = (start, summary)
+    events = sorted(dedup.values(), key=lambda x: x[0])
     content_parts = []
     current_day = None
-    for start, summary in deduped:
+    for start, summary in events:
+
         day_label = start.strftime('%A %b %d')
         time_label = start.strftime('%I:%M %p').lstrip('0')
         if day_label != current_day:
@@ -109,12 +110,14 @@ def main():
             current_day = day_label
         content_parts.append(f"<div class='event'>- {time_label} {summary}</div>")
 
+
     html = TEMPLATE.format(content='\n'.join(content_parts), hash=pw_hash)
     os.makedirs(output_dir, exist_ok=True)
     out_path = os.path.join(output_dir, 'index.html')
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
-    print(out_path, 'generated')
+
+    print(f'{out_path} generated')
 
 
 if __name__ == '__main__':
