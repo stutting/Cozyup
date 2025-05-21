@@ -5,3 +5,4 @@ icalendar
 Jinja2
 python-dotenv
 py-cozi
+requests
