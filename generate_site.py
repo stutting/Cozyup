@@ -84,7 +84,7 @@ def main():
         except Exception as e:
             print('Failed to load', url, e)
 
-    # Deduplicate events by day/time/summary
+    # Deduplicate events by (start time, summary)
     deduped = {}
     for start, summary in events:
         key = (start.replace(tzinfo=None), summary)
@@ -93,6 +93,7 @@ def main():
 
     events = sorted(deduped.values(), key=lambda x: x[0])
 
+    # Generate HTML content
     content_parts = []
     current_day = None
     for start, summary in events:
@@ -102,6 +103,7 @@ def main():
             content_parts.append(f"<div class='event-day'>{day_label}</div>")
             current_day = day_label
         content_parts.append(f"<div class='event'>- {time_label} {summary}</div>")
+
     html = TEMPLATE.format(content='\n'.join(content_parts), hash=pw_hash)
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
