@@ -1,3 +1,5 @@
 # ignore generated site
+
 /index.html
+
 __pycache__/
