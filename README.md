@@ -9,16 +9,18 @@ This repository combines a Cozi calendar and an Outlook calendar and can generat
    ```bash
    pip install -r requirements.txt
    ```
-3. Load the environment variables and run:
+
 
    ```bash
    export $(grep -v '^#' settings.env | xargs)
    python generate_site.py
    ```
-   The script creates `docs/index.html` with the next seven days of events by default.
 
-   You can change the horizon with `DAYS_AHEAD` and the output location with `OUTPUT_DIR`.
-
+wjsubq-codex/host-calendar-display-on-github-pages-with-login
+The script creates `index.html` with the upcoming events (7 days by default).
+Set `DAYS_AHEAD` in your environment to change the horizon.
+   The script creates `index.html` with the next seven days of events.
+main
 You can then push the generated `docs/` directory to the `gh-pages` branch or enable GitHub Pages from the `main` branch to make the page available.
 
 ## Password protection

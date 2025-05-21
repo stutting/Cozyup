@@ -1,9 +1,13 @@
 import os
 
+import requests
+
+
 from datetime import datetime, timedelta
 
 import requests
 from icalendar import Calendar
+main
 
 
 TEMPLATE = """
@@ -57,7 +61,8 @@ def fetch_calendar(url):
     return Calendar.from_ical(resp.text)
 
 
-def parse_events(cal, horizon_days: int):
+def parse_events(cal):
+
 
     now = datetime.now()
     horizon = now + timedelta(days=horizon_days)
@@ -72,6 +77,7 @@ def parse_events(cal, horizon_days: int):
             summary = str(comp.get('summary'))
             events.append((start, summary))
     return events
+ main
 
 def main():
     cozi = os.getenv('COZI_ICS_URL')
@@ -101,6 +107,7 @@ def main():
     events = sorted(dedup.values(), key=lambda x: x[0])
     content_parts = []
     current_day = None
+
     for start, summary in events:
 
         day_label = start.strftime('%A %b %d')
@@ -110,6 +117,7 @@ def main():
             current_day = day_label
         content_parts.append(f"<div class='event'>- {time_label} {summary}</div>")
 
+main
 
     html = TEMPLATE.format(content='\n'.join(content_parts), hash=pw_hash)
     os.makedirs(output_dir, exist_ok=True)
