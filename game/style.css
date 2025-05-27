@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #222;
+  color: #fff;
+  text-align: center;
+}
+canvas {
+  background: #66aaff;
+  display: block;
+  margin: 0 auto;
+  border: 2px solid #fff;
+}
+.screen.hidden {
+  display: none;
+}
+button {
+  padding: 0.5em 1em;
+  font-size: 1em;
+}

@@ -26,3 +26,6 @@ You can then push `index.html` to the `gh-pages` branch or enable GitHub Pages f
 ## Password protection
 The generated page uses a simple client‑side password check. Set the environment variable `SITE_PASSWORD_HASH` to a SHA‑256 hash of your chosen password. Only users with the password can view the page, but note that client‑side protection is not fully secure.
 
+
+## Indie Side Scroller Demo
+A small side scrolling game inspired by classic Flash games is included in the `game` folder. Open `game/index.html` in a modern web browser and use the arrow keys to move and space to jump. Collect all of the golden hearts to advance.
