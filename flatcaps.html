@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flat Cap Co.</title>
+    <style>
+        body { margin:0; font-family: Arial, sans-serif; color:#333; }
+        header {
+            background:#222; color:#fff; padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between;
+        }
+        header h1 { margin:0; font-size:1.5rem; }
+        nav a { color:#fff; margin-left:1rem; text-decoration:none; font-weight:bold; }
+        .hero {
+            background:url('https://images.unsplash.com/photo-1542060741-76358dcf9771?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+            height:60vh; display:flex; align-items:center; justify-content:center; color:#fff; text-align:center;
+        }
+        .hero h2 { font-size:2.5rem; margin:0; }
+        .hero p { font-size:1.2rem; }
+        .cta-button { background:#e63946; color:#fff; padding:0.8rem 1.5rem; border:none; border-radius:5px; cursor:pointer; font-size:1rem; }
+        .features { display:flex; flex-wrap:wrap; padding:2rem; }
+        .feature { flex:1 1 300px; margin:1rem; padding:1rem; box-shadow:0 0 10px rgba(0,0,0,0.1); border-radius:8px; text-align:center; }
+        footer { background:#f8f8f8; text-align:center; padding:2rem; margin-top:2rem; }
+        @media (max-width:600px) {
+            header { flex-direction:column; align-items:flex-start; }
+            nav { margin-top:0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Flat Cap Co.</h1>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#styles">Styles</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+    <section class="hero">
+        <div>
+            <h2>Modern Flat Caps for Every Style</h2>
+            <p>Discover the perfect cap to elevate your look.</p>
+            <button class="cta-button" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});">Shop Now</button>
+        </div>
+    </section>
+    <section id="about" class="features">
+        <div class="feature">
+            <h3>Craftsmanship</h3>
+            <p>Our caps are made from high-quality materials with attention to detail.</p>
+        </div>
+        <div class="feature">
+            <h3>Variety</h3>
+            <p>Choose from a wide range of colors and fabrics to match any outfit.</p>
+        </div>
+        <div class="feature" id="styles">
+            <h3>Modern Fits</h3>
+            <p>We blend classic designs with a modern touch for a comfortable fit.</p>
+        </div>
+    </section>
+    <footer id="contact">
+        <p>Have questions or want to place a bulk order? <a href="mailto:info@flatcapco.example">Email us</a>.</p>
+        <p>&copy; 2023 Flat Cap Co.</p>
+    </footer>
+</body>
+</html>
